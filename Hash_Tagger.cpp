@@ -113,10 +113,10 @@ void assign_vals(string directory, converter tags)
 				word += tolower(l);
 			}
 		}
-		for(map<string, int>::iterator it = counter.begin(); it != counter.end(); ++it)
+		for(map<string, int>::iterator c_iter = counter.begin(); c_iter != counter.end(); ++c_iter)
 		{
 			map<TAG_SIZE, int> inp;
-			string path = ("Data/" + it->first + ".word");
+			string path = ("Data/" + c_iter->first + ".word");
 			if(fileExists(path.c_str()))
 			{
 				ifstream infile(path.c_str(), ios::in | ios::binary);
@@ -130,7 +130,7 @@ void assign_vals(string directory, converter tags)
 				infile.close();
 			}
 			for(vector<TAG_SIZE>::iterator it = v.begin(); it != v.end(); ++it)
-				inp[*it]++;
+				inp[*it] += c_iter->second;
 			ofstream outfile(path.c_str(), ios::out | ios::binary);
 			for(map<TAG_SIZE, int>::iterator it = inp.begin(); it != inp.end(); ++it)
 			{
