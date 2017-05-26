@@ -4,12 +4,16 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 using namespace std;
+#define TAG_SIZE unsigned short
+
+
 // A trie used to make reading words quick and efficient
 struct letter
 {
 	letter *next[26];
-	map<unsigned short, int> tags;
+	map<TAG_SIZE, int> tags;
 	letter()
 	{
 		// Initialize trie with empty characters
@@ -18,8 +22,13 @@ struct letter
 	}
 	// Function to display words gathered
 	void recursify(string now);
+	void save_to_file(string path);
+	void read_from_file(string path);
 };
-
+bool sorter(pair<TAG_SIZE, int> a, pair<TAG_SIZE, int> b)
+{
+	return a.second > b.second;
+}
 // Output words along with tagged entities
 void letter::recursify(string now)
 {
@@ -28,11 +37,12 @@ void letter::recursify(string now)
 	{
 		// Output the word so far
 		cout<<now<<" ";
-		vector<pair<unsigned short, int> > v;
-		
-		for(map<unsigned short, int>::iterator it = tags.begin(); it != tags.end(); ++it)
+		vector<pair<TAG_SIZE, int> > v;
+		copy(tags.begin(), tags.end(), back_inserter(v));
+		sort(v.begin(), v.end(), sorter);
+		for(vector<pair<TAG_SIZE, int> >::iterator it = v.begin(); it != v.end(); ++it)
 		{
-			cout<<it->first<<" ";
+			cout<<it->first<<".."<<it->second<<"  ";
 		}
 		cout<<"\n";
 	}
@@ -41,6 +51,43 @@ void letter::recursify(string now)
 		if(next[i] != NULL)
 		{
 			next[i]->recursify(now + (char)(i + 'a'));
+		}
+	}
+}
+void letter::read_from_file(ifstream file)
+{
+	ofstream out(path.c_str(), ios::app | ios::binary);
+	out.write((char *)this, sizeof(letter));	
+	if(!tags.empty())
+	{
+		vector<pair<TAG_SIZE, int> > v;
+		copy(tags.begin(), tags.end(), back_inserter(v));
+		copy(v.begin(), v.end(), std::ostreambuf_iterator<char>(out));
+	}
+	out.close();
+	for(int i = 0; i < 26; ++i)
+	{
+		if(next[i] != NULL)
+		{
+			next[i]->save_to_file(path);
+		}
+	}
+}
+void letter::save_to_file(ofstream file)
+{
+	file.write((char *)this, sizeof(letter));	
+	if(!tags.empty())
+	{
+		vector<pair<TAG_SIZE, int> > v;
+		copy(tags.begin(), tags.end(), back_inserter(v));
+		copy(v.begin(), v.end(), std::ostreambuf_iterator<char>(file));
+	}
+	out.close();
+	for(int i = 0; i < 26; ++i)
+	{
+		if(next[i] != NULL)
+		{
+			next[i]->save_to_file(file);
 		}
 	}
 }
@@ -55,10 +102,10 @@ bool fileExists(const char *fileName)
 // Used to store tags
 class converter
 {
-	map<string, unsigned short> tag;
+	map<string, TAG_SIZE> tag;
 	public:
 	void init(string file);
-	short operator [] (string tag_name)
+	TAG_SIZE operator [] (string tag_name)
 	{
 		if(tag[tag_name] == 0)
 			return -1;
@@ -98,7 +145,7 @@ void assign_vals(string directory, converter tags)
 		}
 		ifstream f((directory + to_string(i) + ".txt").c_str(), ios::in);
 		ifstream vals((directory + to_string(i) + ".key").c_str(), ios::in);
-		vector<unsigned short> v;
+		vector<TAG_SIZE> v;
 		while(!vals.eof())
 		{
 			string s;
@@ -118,6 +165,8 @@ void assign_vals(string directory, converter tags)
 				skip = true;
 			if(skip)
 				continue;
+			if(l == '\'')
+				continue;
 			if(!isalpha(l))
 			{
 				if(cur != &top)
@@ -136,6 +185,8 @@ void assign_vals(string directory, converter tags)
 				cur = cur->next[tolower(l) - 'a'];
 			}
 		}
+		f.close();
+		vals.close();
 	}
 	string s;
 	top.recursify(s);
