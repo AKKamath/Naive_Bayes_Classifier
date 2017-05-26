@@ -79,6 +79,7 @@ void assign_vals(string directory, converter tags)
 		ifstream f((directory + to_string(i) + ".txt").c_str(), ios::in);
 		ifstream vals((directory + to_string(i) + ".key").c_str(), ios::in);
 		vector<TAG_SIZE> v;
+		map<string, int> counter;
 		while(!vals.eof())
 		{
 			string s;
@@ -103,29 +104,7 @@ void assign_vals(string directory, converter tags)
 			{
 				if(word.length() != 0)
 				{
-					map<TAG_SIZE, int> inp;
-					string path = ("Data/" + word + ".word");
-					if(fileExists(path.c_str()))
-					{
-						ifstream infile(path.c_str(), ios::in | ios::binary);
-						TAG_SIZE t;
-						int val;
-						while(infile.read((char *) &t, sizeof(t)))
-						{
-							infile.read((char *) &val, sizeof(val));
-							inp[t] = val;
-						}
-						infile.close();
-					}
-					for(vector<TAG_SIZE>::iterator it = v.begin(); it != v.end(); ++it)
-						inp[*it]++;
-					ofstream outfile(path.c_str(), ios::out | ios::binary);
-					for(map<TAG_SIZE, int>::iterator it = inp.begin(); it != inp.end(); ++it)
-					{
-						outfile.write((char *) &it->first, sizeof(it->first));
-						outfile.write((char *) &it->second, sizeof(it->second));
-					}
-					outfile.close();
+					counter[word]++;
 				}
 				word.clear();
 			}
@@ -133,6 +112,32 @@ void assign_vals(string directory, converter tags)
 			{
 				word += tolower(l);
 			}
+		}
+		for(map<string, int>::iterator it = counter.begin(); it != counter.end(); ++it)
+		{
+			map<TAG_SIZE, int> inp;
+			string path = ("Data/" + it->first + ".word");
+			if(fileExists(path.c_str()))
+			{
+				ifstream infile(path.c_str(), ios::in | ios::binary);
+				TAG_SIZE t;
+				int val;
+				while(infile.read((char *) &t, sizeof(t)))
+				{
+					infile.read((char *) &val, sizeof(val));
+					inp[t] = val;
+				}
+				infile.close();
+			}
+			for(vector<TAG_SIZE>::iterator it = v.begin(); it != v.end(); ++it)
+				inp[*it]++;
+			ofstream outfile(path.c_str(), ios::out | ios::binary);
+			for(map<TAG_SIZE, int>::iterator it = inp.begin(); it != inp.end(); ++it)
+			{
+				outfile.write((char *) &it->first, sizeof(it->first));
+				outfile.write((char *) &it->second, sizeof(it->second));
+			}
+			outfile.close();
 		}
 		f.close();
 		vals.close();
