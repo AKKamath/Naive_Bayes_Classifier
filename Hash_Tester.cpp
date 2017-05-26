@@ -25,13 +25,7 @@ class converter
 	map<TAG_SIZE, string> tag2;
 	public:
 	void init(string file);
-	short operator [] (string tag_name)
-	{
-		if(tag[tag_name] == 0)
-			return -1;
-		return tag[tag_name];
-	}
-	short operator [] (string tag_name)
+	TAG_SIZE operator [] (string tag_name)
 	{
 		if(tag[tag_name] == 0)
 			return -1;
@@ -143,12 +137,11 @@ void assign_vals(string directory, converter tags)
 		char x = 0;
 		for(vector<pair<TAG_SIZE, int> >::iterator it = v.begin(); it != v.end(); ++it)
 		{
-			vals<<tags[it->first]<<<<" "<<it->second<<"\n";
+			vals<<tags[it->first]<<" "<<it->second<<"\n";
 			if(x > 5)
 				break;
 			++x;
 		}
-		cout<<"\n";
 		f.close();
 		vals.close();
 		ofstream out((directory + "save_state.sav").c_str(), ios::out);
