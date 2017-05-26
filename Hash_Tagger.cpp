@@ -52,9 +52,25 @@ void converter::init(string file)
 // Read
 void assign_vals(string directory, converter tags)
 {
-	string word;
-	for(int i = 0;; ++i)
+	int i = 0;
+	if(fileExists((directory + "save_state.sav").c_str()))
 	{
+		cout<<"Save found, continue from this location? (1 = Yes, 0 = No)\n";
+		int opt;
+		cin>>opt;
+		if(opt == 0)
+			remove((directory + "save_state.sav").c_str());
+		else
+		{
+			ifstream in((directory + "save_state.sav").c_str());
+			in>>i;
+			++i;
+		}
+	}
+	string word;
+	for(;; ++i)
+	{
+		
 		if(!fileExists((directory + to_string(i) + ".txt").c_str()) || !fileExists((directory + to_string(i) + ".key").c_str()))
 		{
 			cout<<"Reached "<<i<<".txt\n";
@@ -88,9 +104,10 @@ void assign_vals(string directory, converter tags)
 				if(word.length() != 0)
 				{
 					map<TAG_SIZE, int> inp;
-					if(fileExists((word + ".word").c_str()))
+					string path = ("Data/" + word + ".word");
+					if(fileExists(path.c_str()))
 					{
-						ifstream infile((word + ".word").c_str(), ios::in | ios::binary);
+						ifstream infile(path.c_str(), ios::in | ios::binary);
 						TAG_SIZE t;
 						int val;
 						while(infile.read((char *) &t, sizeof(t)))
@@ -102,7 +119,7 @@ void assign_vals(string directory, converter tags)
 					}
 					for(vector<TAG_SIZE>::iterator it = v.begin(); it != v.end(); ++it)
 						inp[*it]++;
-					ofstream outfile((word + ".word").c_str(), ios::out | ios::binary);
+					ofstream outfile(path.c_str(), ios::out | ios::binary);
 					for(map<TAG_SIZE, int>::iterator it = inp.begin(); it != inp.end(); ++it)
 					{
 						outfile.write((char *) &it->first, sizeof(it->first));
@@ -114,13 +131,16 @@ void assign_vals(string directory, converter tags)
 			}
 			else
 			{
-				word += l;
+				word += tolower(l);
 			}
 		}
 		f.close();
 		vals.close();
+		ofstream out((directory + "save_state.sav").c_str(), ios::out);
+		out<<i;
 	}
 }
+
 int main(int argv, char *argc[])
 {
 	if(argv < 3)
