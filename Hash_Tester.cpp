@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
-#define TAG_SIZE unsigned short
+#define TAG_SIZE unsigned int
 
 // Check if file exists
 bool fileExists(const char *fileName)

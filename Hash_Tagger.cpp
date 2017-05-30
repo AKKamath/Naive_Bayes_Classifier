@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 using namespace std;
-#define TAG_SIZE unsigned short
+#define TAG_SIZE unsigned int
 
 struct stat sb;
 
