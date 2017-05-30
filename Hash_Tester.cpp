@@ -90,7 +90,7 @@ void TagStorage::init(string file)
 		t.name = s;
 		getline(f, s);
 		t.category = s;
-		tag[s] = t;
+		tag[t.name] = t;
 		tag2[t.id] = t.name;
 	}
 }
