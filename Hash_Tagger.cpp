@@ -19,21 +19,39 @@ bool fileExists(const char *fileName)
     return infile.good();
 }
 
+// Structure of a tag
+struct TagStructure
+{
+	TAG_SIZE id;
+	string name;
+	string category;
+	TagStructure()
+	{
+		id = 0;
+		name = "";
+		category = "";
+	}
+};
 
 // Used to store tags
 class TagStorage
 {
 	// Stores the tags
 	// string is the tagName, TAG_SIZE is the ID
-	map<string, TAG_SIZE> tag;
+	map<string, TagStructure> tag;
 	public:
 	// Used to read from file and create tags
 	void init(string file);
 	// Access tags by string name
 	TAG_SIZE operator [] (string tag_name)
 	{
-		if(tag[tag_name] == 0)
+		if(tag[tag_name].id == 0)
 			return -1;
+		return tag[tag_name].id;
+	}
+	// Get the TagStructure itself
+	TagStructure get(string tag_name)
+	{
 		return tag[tag_name];
 	}
 	// Output all tags
@@ -44,9 +62,9 @@ class TagStorage
 void TagStorage::print()
 {
 	cout<<"Name\tTag\n";
-	for(map<string, TAG_SIZE>::iterator it = tag.begin(); it != tag.end(); ++it)
+	for(map<string, TagStructure>::iterator it = tag.begin(); it != tag.end(); ++it)
 	{
-		cout<<it->first<<"\t"<<it->second<<"\n";
+		cout<<it->first<<"\t"<<it->second.id<<"\n";
 	}
 }
 
@@ -59,11 +77,18 @@ void TagStorage::init(string file)
 		return;
 	}
 	ifstream f(file.c_str(), ios::in);
-	int i = 1;
-	// Read tag name, increment ID and store
+	// Read tag id, create data, and store
 	string s;
-	while(getline(f, s))
-		tag[s] = i++;
+	while(getline(f, s, ','))
+	{
+		TagStructure t;
+		t.id = stoi(s);
+		getline(f, s, ',');
+		t.name = s;
+		getline(f, s);
+		t.category = s;
+		tag[s] = t;
+	}
 }
 
 // Read training data from files
