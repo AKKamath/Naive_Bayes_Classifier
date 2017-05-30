@@ -5,9 +5,12 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <sys/stat.h>
+#include <stdlib.h>
 using namespace std;
 #define TAG_SIZE unsigned short
 
+struct stat sb;
 
 // Check if file exists
 bool fileExists(const char *fileName)
@@ -39,7 +42,7 @@ void converter::init(string file)
 		return;
 	}
 	ifstream f(file.c_str(), ios::in);
-	int i = 0;
+	int i = 1;
 	while(!f.eof())
 	{
 		string s;
@@ -112,6 +115,10 @@ void assign_vals(string directory, converter tags)
 			{
 				word += tolower(l);
 			}
+		}
+		if (!(stat("./Data", &sb) == 0 && S_ISDIR(sb.st_mode)))
+		{
+			system("mkdir Data");
 		}
 		for(map<string, int>::iterator c_iter = counter.begin(); c_iter != counter.end(); ++c_iter)
 		{
