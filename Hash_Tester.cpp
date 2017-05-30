@@ -47,14 +47,12 @@ void converter::init(string file)
 	}
 	ifstream f(file.c_str(), ios::in);
 	int i = 1;
-	while(!f.eof())
+	string s;
+	while(getline(f, s))
 	{
-		string s;
-		getline(f, s);
 		tag2[i] = s;
 		tag[s] = i++;
 	}
-	
 }
 
 
@@ -70,7 +68,6 @@ void assign_vals(string directory, converter tags)
 		cin>>opt;
 		if(opt == 0)
 		{
-			system("rm -r Data");
 			remove((directory + "save_state.sav").c_str());
 		}
 		else

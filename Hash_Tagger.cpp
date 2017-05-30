@@ -31,8 +31,16 @@ class converter
 			return -1;
 		return tag[tag_name];
 	}
+	void print();
 };
-
+void converter::print()
+{
+	cout<<"Name\tTag\n";
+	for(map<string, TAG_SIZE>::iterator it = tag.begin(); it != tag.end(); ++it)
+	{
+		cout<<it->first<<"\t"<<it->second<<"\n";
+	}
+}
 // Read tags from file and assign values
 void converter::init(string file)
 {
@@ -43,13 +51,9 @@ void converter::init(string file)
 	}
 	ifstream f(file.c_str(), ios::in);
 	int i = 1;
-	while(!f.eof())
-	{
-		string s;
-		getline(f, s);
+	string s;
+	while(getline(f, s))
 		tag[s] = i++;
-	}
-	
 }
 
 // Read
@@ -62,7 +66,10 @@ void assign_vals(string directory, converter tags)
 		int opt;
 		cin>>opt;
 		if(opt == 0)
+		{
 			remove((directory + "save_state.sav").c_str());
+			system("rm -r Data");
+		}
 		else
 		{
 			ifstream in((directory + "save_state.sav").c_str());
@@ -83,10 +90,9 @@ void assign_vals(string directory, converter tags)
 		ifstream vals((directory + to_string(i) + ".key").c_str(), ios::in);
 		vector<TAG_SIZE> v;
 		map<string, int> counter;
-		while(!vals.eof())
+		string s;
+		while(getline(vals, s))
 		{
-			string s;
-			getline(vals, s);
 			if(tags[s] != -1)
 				v.push_back(tags[s]);
 		}
@@ -162,6 +168,7 @@ int main(int argv, char *argc[])
 	}
 	converter tag;
 	tag.init(argc[1]);
+	//tag.print();
 	assign_vals(argc[2], tag);
 	return 0;
 }
