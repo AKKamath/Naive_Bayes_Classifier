@@ -81,6 +81,8 @@ void TagStorage::init(string file)
 	string s;
 	while(getline(f, s, ','))
 	{
+		if(s.empty())
+			break;
 		TagStructure t;
 		t.id = stoi(s);
 		getline(f, s, ',');

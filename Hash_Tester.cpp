@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <tuple>
 #include <algorithm>
 using namespace std;
 #define TAG_SIZE unsigned int
@@ -13,11 +14,6 @@ bool fileExists(const char *fileName)
 {
     ifstream infile(fileName);
     return infile.good();
-}
-// Used to sort tags by probability
-bool sorter(pair<TAG_SIZE, int> a, pair<TAG_SIZE, int> b)
-{
-	return a.second > b.second;
 }
 
 // Structure of a tag
@@ -32,7 +28,19 @@ struct TagStructure
 		name = "";
 		category = "";
 	}
+	TagStructure(TAG_SIZE Id, string Name, string Category)
+	{
+		id = Id;
+		name = Name;
+		category = Category;
+	}
 };
+
+// Used to sort tags by probability
+bool sorter(pair<TAG_SIZE, int> a, pair<TAG_SIZE, int> b)
+{
+	return a.second > b.second;
+}
 
 // Used to store tags
 class TagStorage
@@ -52,9 +60,13 @@ class TagStorage
 		return tag[tag_name].id;
 	}
 	// Retrieve tag by ID
-	string operator [](unsigned short val)
+	string operator [](TAG_SIZE val)
 	{
 		return tag2[val];
+	}
+	string getCategory(TAG_SIZE val)
+	{
+		return tag[tag2[val]].category;
 	}
 	// Output all tags
 	void print();
@@ -118,7 +130,6 @@ void assignValues(string directory, TagStorage tags)
 			++i;
 		}
 	}
-
 	string word;
 	for(;; ++i)
 	{
@@ -183,23 +194,28 @@ void assignValues(string directory, TagStorage tags)
 			}
 		}
 		// Go through all tags obtained
-		vector<pair<TAG_SIZE, int> > v;
-		copy(possible_tags.begin(), possible_tags.end(), back_inserter(v));
-		// Sort tags by probability
-		sort(v.begin(), v.end(), sorter);
-		// Output top 5 tags
-		char x = 0;
-		for(vector<pair<TAG_SIZE, int> >::iterator it = v.begin(); it != v.end(); ++it)
+		map<string, vector<pair<TAG_SIZE, int> > > mapper;
+		for(map<TAG_SIZE, int>::iterator it = possible_tags.begin(); it != possible_tags.end(); ++it)
 		{
-			tag_file<<tags[it->first]<<" "<<it->second<<"\n";
-			if(x > 5)
-				break;
-			++x;
+			mapper[tags.getCategory(it->first)].push_back(pair<TAG_SIZE, int>(it->first, it->second));
 		}
-		main_file.close();
-		tag_file.close();
-		ofstream out((directory + "save_state.sav").c_str(), ios::out);
-		out<<i;
+		for(map<string, vector<pair<TAG_SIZE, int> > >::iterator map_it = mapper.begin(); map_it != mapper.end(); ++map_it)
+		{
+			tag_file<<map_it->first<<"\n";
+			vector<pair<TAG_SIZE, int> > v = map_it->second;
+			// Sort tags by probability
+			sort(v.begin(), v.end(), sorter);
+			// Output top 5 tags
+			string s;
+			for(vector<pair<TAG_SIZE, int> >::iterator it = v.begin(); it != v.end(); ++it)
+			{
+				tag_file<<tags[it->first]<<" "<<it->second<<"\n";
+			}
+			main_file.close();
+			tag_file.close();
+			ofstream out((directory + "save_state.sav").c_str(), ios::out);
+			out<<i;
+		}
 	}
 }
 
